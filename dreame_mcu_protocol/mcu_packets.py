@@ -325,4 +325,10 @@ TYPES_FROM_MCU = {
     0x01: Status20ms,
     0x02: Status10ms,
     0x03: Status100ms,
+    # 0x04 - factory test
+    # 0x05 - 500ms
+
+    # 38 - ???
+    # 40 - ???
+
 }

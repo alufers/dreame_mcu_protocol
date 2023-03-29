@@ -8,7 +8,9 @@
 #
 # Message structure:
 # The messages are binary, but are wrapped in < and > characters (presumably to synchronize the start and end of the message).
-# It appears from RE of the parser that the '?' character can appear between messages, but I have not seen it in practice.
+# It appears from RE of the parser that the '?' character can appear between messages, but I don't know what it means. 
+# Probably the ? is needed to decode the messages correctly, since now the decoder is struggling with decoding all of them.
+#
 # The message between the delimeters is a sequence of bytes, with the following structure:
 #
 # +----------------+----------------+---------------------------------+-----------------+
