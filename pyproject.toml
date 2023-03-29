@@ -1,0 +1,22 @@
+
+[tool.poetry]
+name = "dreame_mcu_protocol"
+version = "0.1.0"
+description = ""
+authors = ["alufers <alufers@wp.pl>"]
+readme = "README.md"
+packages = [{include = "dreame_mcu_protocol"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+bitstring = "^4.0.1"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+decode_packet = "dreame_mcu_protocol.scripts.decode_packet:main"
+sniff_over_ssh = "dreame_mcu_protocol.scripts.sniff_over_ssh:main"
