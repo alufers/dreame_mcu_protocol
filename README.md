@@ -20,6 +20,7 @@ poetry install
 
 - `poetry run decode_packet` - a low level script for decoding packets, it contains some hardcoded data that I have captured using `strace` from the running vacuum cleaner application. 
 - `poetry run sniff_over_ssh --host root@10.123.1.167` - a script for sniffing the communication between the vacuum cleaner and the MCU over SSH. It requires a rooted vacuum cleaner and a way to connect to it over SSH. You also need to copy `strace_arm64` to `/data`.
+- `poetry run gui --host root@10.123.1.167` - sniffs the communication between the vacuum cleaner and the MCU over SSH and displays the data in a char. WIP
 
 ## Manually capturing data from the vacuum cleaner
 

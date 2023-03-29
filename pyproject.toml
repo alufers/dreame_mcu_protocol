@@ -10,6 +10,7 @@ packages = [{include = "dreame_mcu_protocol"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 bitstring = "^4.0.1"
+matplotlib = "^3.7.1"
 
 
 
@@ -20,3 +21,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 decode_packet = "dreame_mcu_protocol.scripts.decode_packet:main"
 sniff_over_ssh = "dreame_mcu_protocol.scripts.sniff_over_ssh:main"
+gui = "dreame_mcu_protocol.scripts.gui:main"
