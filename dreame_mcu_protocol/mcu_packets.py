@@ -387,4 +387,23 @@ TYPES_FROM_MCU = {
 }
 
 TYPES_TO_MCU = {
+
+    # NOTES FROM RE OF MCU FIRWARE:
+    # Maximal packet type is 0x29
+
+    # 0x00 - length should be 9
+    #  Byte 1 - 0 or 1
+
+    # 0x01 - length should be 5
+
+    # 0x02 - length should be 1, the byte should be less than 53
+
+    # 0x03 - non-existent
+
+    # 0x04 - length should be 14
+
+    # 0x05 - 0x09 - non-existent
+
+    # 0x0A - length should be 1, the byte should be 0, 1 or 2
+
 }
