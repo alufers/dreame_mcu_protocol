@@ -8,6 +8,10 @@ The SoC usually runs a big Linux application that handles navigation, mapping an
 
 Here are my notes about the vacuum cleaner's internals [dreame_z10_notes.md](./dreame_z10_notes.md) and the protocol.
 
+## Special thanks
+
+Special thanks to Dennis Giese from https://dontvacuum.me/ for helping me with the reverse engineering and giving some very important hints.
+
 ## Installation
 
 Python 3 and [poetry](https://python-poetry.org/) are required.
