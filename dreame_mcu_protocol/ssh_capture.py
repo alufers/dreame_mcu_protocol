@@ -64,12 +64,12 @@ def capture_ssh_output(
 
                 if line.startswith(b"write("):
                     # write to serial
-                    # print("write: {}".format(line))
+                    # print("write: {}".format(line.decode("utf-8")))
 
                     write_stream.write(bytes_from_strace_line(line))
                 elif line.startswith(b"read("):
                     # read from serial
-
+                    # print("read: {}".format(line.decode("utf-8")))
                     read_stream.write(bytes_from_strace_line(line))
         finally:
             strace_proc.terminate()

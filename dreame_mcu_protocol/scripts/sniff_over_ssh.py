@@ -1,6 +1,6 @@
 import argparse
 from ..ssh_capture import capture_ssh_output
-from ..mcu_packets import read_packet, parse_packet, TYPES_FROM_MCU
+from ..mcu_packets import read_packet, parse_packet, TYPES_FROM_MCU, TYPES_TO_MCU
 import os
 
 
@@ -40,6 +40,12 @@ def main():
         action=argparse.BooleanOptionalAction,
         type=bool,
     )
+    parser.add_argument(
+        "--direction",
+        help="The direction of the packets to sniff",
+        type=str,
+        choices=["to_mcu", "from_mcu"],
+    )
     args = parser.parse_args()
 
     (r, w) = capture_ssh_output(
@@ -47,16 +53,21 @@ def main():
         strace_path=args.strace_path,
         serial_path=args.serial_path,
     )
+    PACKET_TYPES = TYPES_FROM_MCU
+    stream = r
+    if args.direction == "to_mcu":
+        stream = w
+        PACKET_TYPES = TYPES_TO_MCU
     if args.dump_unknown:
         os.makedirs("unknowns", exist_ok=True)
     while True:
         try:
-            raw_packet = read_packet(r)
+            raw_packet = read_packet(stream)
             (type, payload) = parse_packet(raw_packet)
-            if type in TYPES_FROM_MCU:
-                type_name = TYPES_FROM_MCU[type].__name__
+            if type in PACKET_TYPES:
+                type_name = PACKET_TYPES[type].__name__
                 try:
-                    decoded = TYPES_FROM_MCU[type](payload)
+                    decoded = PACKET_TYPES[type](payload)
                     if args.focus_msg is not None:
                         if args.focus_msg == type_name:
                             print(
@@ -80,7 +91,7 @@ def main():
                         "Unknown type 0x{:02x} (len = {}):".format(type, len(payload))
                     )
                 if args.dump_unknown:
-                    with open("unknowns/unknown_0x{:02x}.txt".format(type), "a") as f:
+                    with open("unknowns/unknown_{}_0x{:02x}.txt".format(args.direction, type), "a") as f:
                         f.write("{}\n".format(payload.hex()))
         except Exception as e:
             if args.focus_msg is not None or args.focus_msg == "CrcError":

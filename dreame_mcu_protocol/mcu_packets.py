@@ -385,3 +385,6 @@ TYPES_FROM_MCU = {
     # 38 - ???
     # 40 - ???
 }
+
+TYPES_TO_MCU = {
+}
