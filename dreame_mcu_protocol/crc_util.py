@@ -256,6 +256,8 @@ g_McRctable_16 = [
     0x8081,
     0x4040,
 ]
+
+
 # https://blog.csdn.net/swmyaopeng/article/details/80763195
 def CRC_GetModbus16(pData):
     cRc_16 = 0xFFFF

@@ -50,7 +50,6 @@ def capture_ssh_output(
 
     # run in another thread
     def read_strace_output():
-
         cmd = "{} -xx -p {} -P {}".format(strace_path, pid, serial_path)
 
         strace_proc = subprocess.Popen(
@@ -64,18 +63,15 @@ def capture_ssh_output(
                     break
 
                 if line.startswith(b"write("):
-
                     # write to serial
                     # print("write: {}".format(line))
 
                     write_stream.write(bytes_from_strace_line(line))
                 elif line.startswith(b"read("):
-
                     # read from serial
 
                     read_stream.write(bytes_from_strace_line(line))
         finally:
-
             strace_proc.terminate()
 
     t = threading.Thread(target=read_strace_output)
