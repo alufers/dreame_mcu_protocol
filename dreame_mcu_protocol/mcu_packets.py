@@ -6,7 +6,7 @@ from bitstring import BitArray
 
 PACKET_START = b"<"
 PACKET_END = b">"
-
+PACKET_ESCAPE = b"?"
 
 def read_packet(stream: BytesIO):
     packet = b""
@@ -17,6 +17,10 @@ def read_packet(stream: BytesIO):
             packet = b""
         elif c == PACKET_END:
             return packet
+        elif c == PACKET_ESCAPE:
+            
+            c = stream.read(1)
+            packet += c
         else:
             # append byte
             packet += c
