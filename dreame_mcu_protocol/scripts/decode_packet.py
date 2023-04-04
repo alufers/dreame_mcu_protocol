@@ -45,7 +45,7 @@ def analyze_message(msg):
     ascii = ""
     for c in packet:
         if c >= 32 and c <= 126:
-            ascii += chr(c)+ "  "
+            ascii += chr(c) + "  "
         else:
             ascii += ".  "
     print(ascii)
@@ -103,5 +103,13 @@ def main():
     # )  # squashfs-root/ava/script/ota_base_station.sh
 
     analyze_message(
-        bytes.fromhex("3c09030f0002000100ff120228f0b6b81800ecff18002b00030076400000b7043e")
+        bytes.fromhex(
+            "3c09030f0002000100ff120228f0b6b81800ecff18002b00030076400000b7043e"
+        )
     )  # packet that had a mismatched crc
+
+    # battery status parsing
+    payload = bytes.fromhex("4040a600fa00000017250000")
+
+    bat_status = BatteryStatus(payload)
+    print(bat_status)

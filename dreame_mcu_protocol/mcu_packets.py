@@ -8,9 +8,10 @@ PACKET_START = b"<"
 PACKET_END = b">"
 PACKET_ESCAPE = b"?"
 
+
 def read_packet(stream: BytesIO):
     """
-        Reads a binary packet enclosed in < and >, with ? escaping.
+    Reads a binary packet enclosed in < and >, with ? escaping.
     """
     packet = b""
     raw_packet = b""
@@ -71,34 +72,39 @@ def unpack_checked(fmt: str, data: bytes) -> typing.Tuple:
         )
     return struct.unpack(fmt, data)
 
+
 def reverse_bits(data: bytes) -> bytes:
     """
     Reverse bits in each byte
     """
-    return bytes([
-        (x & 0b10000000) >> 7 |
-        (x & 0b01000000) >> 5 |
-        (x & 0b00100000) >> 3 |
-        (x & 0b00010000) >> 1 |
-        (x & 0b00001000) << 1 |
-        (x & 0b00000100) << 3 |
-        (x & 0b00000010) << 5 |
-        (x & 0b00000001) << 7
-         for x in data])
+    return bytes(
+        [
+            (x & 0b10000000) >> 7
+            | (x & 0b01000000) >> 5
+            | (x & 0b00100000) >> 3
+            | (x & 0b00010000) >> 1
+            | (x & 0b00001000) << 1
+            | (x & 0b00000100) << 3
+            | (x & 0b00000010) << 5
+            | (x & 0b00000001) << 7
+            for x in data
+        ]
+    )
+
 
 class Status20ms:
     """
     From MCU, sent every 20ms
     """
 
-    timestamp_us: int # iint32
-    x: int # int32
-    y: int # int32
-    yaw: float # int32
-    yaw_integral: int # int32
-    leftVel: int # int16
-    rightVel: int # int16
-    edgeDis: int # int16
+    timestamp_us: int  # iint32
+    x: int  # int32
+    y: int  # int32
+    yaw: float  # int32
+    yaw_integral: int  # int32
+    leftVel: int  # int16
+    rightVel: int  # int16
+    edgeDis: int  # int16
     roller_motor_current: int
     sidebrush_motor_current: int
 
@@ -197,6 +203,7 @@ class Status100ms:
         self.water_tank_installed = (self.bit_flags >> 1) & 1
         self.hepa_state = (self.bit_flags >> 2) & 1
         self.carpet_state = (self.bit_flags >> 3) & 1
+
     def __repr__(self):
         return "pitch={: 7.2f}°, roll={: 7.2f}°, leftCurrent={:d}mA, rightCurrent={:d}mA, dustBoxSta={:d}, waterBoxSta={:d}, hepaSta={:d}, carpetSta={:d}".format(
             self.pitch,
@@ -209,6 +216,7 @@ class Status100ms:
             self.carpet_state,
             # self.unknown,
         )
+
 
 class Triggers:
     key1: bool
@@ -227,18 +235,18 @@ class Triggers:
     d_view_rb: bool
     mag_signal_left: bool
     mag_signal_right: bool
-    ir_dock_lf: int # 3 bits
+    ir_dock_lf: int  # 3 bits
     ir_field_lf: bool
-    ir_dock_lmf: int # 3 bits
+    ir_dock_lmf: int  # 3 bits
     ir_field_lmf: bool
-    ir_dock_rmf: int # 3 bits
+    ir_dock_rmf: int  # 3 bits
     ir_field_rmf: bool
-    ir_dock_rf: int # 3 bits
+    ir_dock_rf: int  # 3 bits
     ir_field_rf: bool
     dock_sta: bool
     lds_button1: bool
     lds_button2: bool
-    res1: int # 2 bits (reserved?)
+    res1: int  # 2 bits (reserved?)
     side_error: bool
     roll_error: bool
     pump_error: bool
@@ -248,7 +256,7 @@ class Triggers:
     pump_overcurrent: bool
     left_wheel_overcurrent: bool
     right_wheel_overcurrent: bool
-    res2: int # 2 bits (reserved?)
+    res2: int  # 2 bits (reserved?)
     lidar_error: bool
     fan_error: bool
     left_vel_error: bool
@@ -257,6 +265,7 @@ class Triggers:
     right_mag_error: bool
     imu_error: bool
     charge_error: bool
+
     def __init__(self, data):
         if len(data) != 7:
             raise ValueError("Triggers must be 7 bytes long, got %d" % len(data))
@@ -326,9 +335,43 @@ class Triggers:
 
     def __repr__(self):
         # loop through all the attributes and print the ones that are true or non-zero
-        return "Triggers(%s)" % ", ".join("%s=%s" % (k, v) for k, v in self.__dict__.items() if v)
+        return "Triggers(%s)" % ", ".join(
+            "%s=%s" % (k, v) for k, v in self.__dict__.items() if v
+        )
 
 
+class BatteryStatus:
+    battery_voltage: float  # V
+    battery_current: float  # mA
+    battery_temperature: float  # C
+    charge_voltage: float  # V
+    state_of_charge: float  # %
+    unknown: int
+
+    def __init__(self, data):
+        (
+            battery_voltage,
+            battery_current,
+            battery_temperature,
+            charge_voltage,
+            state_of_charge,
+            self.unknown,
+        ) = unpack_checked("<HHhHhH", data)
+        self.battery_voltage = battery_voltage / 1000
+        self.battery_current = battery_current
+        self.battery_temperature = battery_temperature / 10
+        self.charge_voltage = charge_voltage / 1000
+        self.state_of_charge = state_of_charge / 100
+
+    def __repr__(self):
+        return "BatteryStatus(battery_voltage = {:.2f} V, battery_current = {:.2f} mA, battery_temperature = {:.1f} C, charge_voltage = {:.2f}V, state_of_charge = {:.1f} %, unknown = {})".format(
+            self.battery_voltage,
+            self.battery_current,
+            self.battery_temperature,
+            self.charge_voltage,
+            self.state_of_charge,
+            self.unknown,
+        )
 
 
 TYPES_FROM_MCU = {
@@ -336,10 +379,9 @@ TYPES_FROM_MCU = {
     0x01: Status20ms,
     0x02: Status10ms,
     0x03: Status100ms,
+    0x2B: BatteryStatus,
     # 0x04 - factory test
     # 0x05 - 500ms
-
     # 38 - ???
     # 40 - ???
-
 }
