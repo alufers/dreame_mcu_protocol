@@ -9,6 +9,9 @@ PACKET_END = b">"
 PACKET_ESCAPE = b"?"
 
 def read_packet(stream: BytesIO):
+    """
+        Reads a binary packet enclosed in < and >, with ? escaping.
+    """
     packet = b""
     raw_packet = b""
     packet_started = False
