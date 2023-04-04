@@ -10,18 +10,22 @@ PACKET_ESCAPE = b"?"
 
 def read_packet(stream: BytesIO):
     packet = b""
+    raw_packet = b""
+    packet_started = False
     while True:
         c = stream.read(1)
+        raw_packet += c
         # print(c)
         if c == PACKET_START:
             packet = b""
-        elif c == PACKET_END:
+            packet_started = True
+        elif c == PACKET_END and packet_started:
             return packet
-        elif c == PACKET_ESCAPE:
-            
+        elif c == PACKET_ESCAPE and packet_started:
             c = stream.read(1)
+            raw_packet += c
             packet += c
-        else:
+        elif packet_started:
             # append byte
             packet += c
 

@@ -8,10 +8,10 @@
 #
 # Message structure:
 # The messages are binary, but are wrapped in < and > characters (presumably to synchronize the start and end of the message).
-# It appears from RE of the parser that the '?' character can appear between messages, but I don't know what it means. 
-# Probably the ? is needed to decode the messages correctly, since now the decoder is struggling with decoding all of them.
+# The ? character is an escape character, and is used to escape the <, >, and ? characters.
+# Please note that for some reason the MCU sometimes sends corrupted messages, which don't start with <, and the crc of them
+# is wrong. You must take that into account when parsing the messages.
 #
-# Todo 
 # The message between the delimeters is a sequence of bytes, with the following structure:
 #
 # +----------------+----------------+---------------------------------+-----------------+
@@ -40,6 +40,15 @@ def analyze_message(msg):
     for i in range(first_byte):
         str += "XX "
     print(str + "CR CR")
+
+    # print ascii representation, if possible
+    ascii = ""
+    for c in packet:
+        if c >= 32 and c <= 126:
+            ascii += chr(c)+ "  "
+        else:
+            ascii += ".  "
+    print(ascii)
 
     length = packet[0]
     type = packet[1]
@@ -89,6 +98,10 @@ def main():
         bytes.fromhex("3C010A81C0E63E")
     )  # squashfs-root/ava/script/ota_base_station.sh
 
+    # analyze_message(
+    #     bytes.fromhex("3c1a01a49ec0fb16150000d5d3ffff24cbffff113700000000000000006f3f3e")
+    # )  # squashfs-root/ava/script/ota_base_station.sh
+
     analyze_message(
-        bytes.fromhex("3c1a01a49ec0fb16150000d5d3ffff24cbffff113700000000000000006f3f3e")
-    )  # squashfs-root/ava/script/ota_base_station.sh
+        bytes.fromhex("3c09030f0002000100ff120228f0b6b81800ecff18002b00030076400000b7043e")
+    )  # packet that had a mismatched crc
