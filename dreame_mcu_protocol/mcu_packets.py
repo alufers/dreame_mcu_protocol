@@ -384,7 +384,7 @@ TYPES_FROM_MCU = {
     # 0x07 - legnth 16, appears to contain the version and git hash of the MCU firmware
     # 0x0b - len 1
     # 0x0d - length = 2
-    # 0x0f - length = 8, sent from Com Timer
+    # 0x0f - length = 8, sent from Com Timer, one uint32 is timestamp, second uint32 is some kind of time delta
 
     # 0x10 - length = 1, contains no useful data, sent in reply to pkt 19
 
@@ -406,17 +406,22 @@ TYPES_TO_MCU = {
 
     # 0x00 - length should be 9
     #  Byte 1 - 0 or 1
-
     # 0x01 - length should be 5
-
     # 0x02 - length should be 1, the byte should be less than 53
-
-    # 0x03 - XXXX
-
+    # 0x03 - INVALID
     # 0x04 - length should be 14
-
-    # 0x05 - 0x09 - XXXX
-
+    # 0x05 - INVALID
+    # 0x06 - INVALID
+    # 0x07 - INVALID
+    # 0x08 - INVALID
+    # 0x09 - INVALID
     # 0x0A - length should be 1, the byte should be 0, 1 or 2
+    # 0x0B - length should be 2, first byte 0-6, second byte ==1
+    # 0x0C - length should be 4
+    # 0x0D - length should be 4, (similar to 0x0C)
+    # 0x0E - length should be 4
+    # 0x0F - length should be 4, one uint (something with time)
+
+
 
 }
