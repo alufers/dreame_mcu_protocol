@@ -97,7 +97,7 @@ class Status20ms:
     From MCU, sent every 20ms
     """
 
-    timestamp_us: int  # iint32
+    timestamp_us: int  # int32
     x: int  # int32
     y: int  # int32
     yaw: float  # int32
@@ -379,10 +379,23 @@ TYPES_FROM_MCU = {
     0x01: Status20ms,
     0x02: Status10ms,
     0x03: Status100ms,
+    # 0x04 - factory test, length = 1
+    # 0x05 - 500ms, length = 6
+    # 0x07 - legnth 16, appears to contain the version and git hash of the MCU firmware
+    # 0x0b - len 1
+    # 0x0d - length = 2
+    # 0x0f - length = 8, sent from Com Timer
+
+    # 0x10 - length = 1, contains no useful data, sent in reply to pkt 19
+
+    # 0x11, length = 2, some kind of elaborate bitmask, sent from imu task
+    # 0x20, length = 7, linelaser status, { timestamp(uint32), 0 uint16, status uint16 }
+    # 0x23, length = 5, something connected with the base
+    # 0x24, length = 1, one bit
+    # 0x26, length = 2, slowSensor
+    # 0x27, length = 12,
+    # 0x29, length = 5, reads from product ID register, so probably the MCU type
     0x2B: BatteryStatus,
-    # 0x04 - factory test
-    # 0x05 - 500ms
-    # 38 - ???
     # 40 - ???
 }
 
@@ -398,11 +411,11 @@ TYPES_TO_MCU = {
 
     # 0x02 - length should be 1, the byte should be less than 53
 
-    # 0x03 - non-existent
+    # 0x03 - XXXX
 
     # 0x04 - length should be 14
 
-    # 0x05 - 0x09 - non-existent
+    # 0x05 - 0x09 - XXXX
 
     # 0x0A - length should be 1, the byte should be 0, 1 or 2
 
