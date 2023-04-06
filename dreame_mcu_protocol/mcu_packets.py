@@ -415,8 +415,8 @@ TYPES_FROM_MCU = {
     # 0x26, length = 2, slowSensor
     # 0x27, length = 12,
     # 0x29, length = 5, reads from product ID register, so probably the MCU type
+    # 0x28 ???
     0x2B: BatteryStatus,
-    # 40 - ???
 }
 
 TYPES_TO_MCU = {
