@@ -373,6 +373,23 @@ class BatteryStatus:
             self.unknown,
         )
 
+class Status500ms:
+    unk1: int # uint8
+    sequence: int # uint8
+    rtc_timestamp: int # uint32, unix timestamp
+    def __init__(self, data):
+        self.unk1, self.sequence, self.rtc_timestamp = unpack_checked("<BBI", data)
+    def __repr__(self):
+        return "Status500ms(unk1 = {}, sequence = {}, rtc_timestamp = {})".format(self.unk1, self.sequence, self.rtc_timestamp)
+
+class Unk0x0F:
+    # one uint32 is timestamp, second uint32 is some kind of time delta
+    timestamp: int # uint32
+    unk1_delta: int # uint32
+    def __init__(self, data):
+        self.timestamp, self.unk1_delta = unpack_checked("<II", data)
+    def __repr__(self):
+        return "Unk0x0F(timestamp = {}, unk1_delta = {})".format(self.timestamp, self.unk1_delta)
 
 TYPES_FROM_MCU = {
     0x00: Triggers,
@@ -380,12 +397,13 @@ TYPES_FROM_MCU = {
     0x02: Status10ms,
     0x03: Status100ms,
     # 0x04 - factory test, length = 1
-    # 0x05 - 500ms, length = 6
+    
+    0x05: Status500ms, # 0x05 - 500ms, length = 6, RTC data
     # 0x07 - legnth 16, appears to contain the version and git hash of the MCU firmware
     # 0x0b - len 1
     # 0x0d - length = 2
-    # 0x0f - length = 8, sent from Com Timer, one uint32 is timestamp, second uint32 is some kind of time delta
-
+   
+    0x0f: Unk0x0F,  # 0x0f - length = 8, sent from Com Timer, 
     # 0x10 - length = 1, contains no useful data, sent in reply to pkt 19
 
     # 0x11, length = 2, some kind of elaborate bitmask, sent from imu task

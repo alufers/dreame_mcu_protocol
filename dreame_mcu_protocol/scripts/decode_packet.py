@@ -113,3 +113,20 @@ def main():
 
     bat_status = BatteryStatus(payload)
     print(bat_status)
+
+    with open("captures/unknowns_from_mcu_0x0f.txt", "r") as f:
+        for line in f:
+            payload = bytes.fromhex(line.strip())
+            if len(payload) != 8:
+                continue
+            msg = Unk0x0F(payload)
+            print(msg)
+    with open("captures/unknown_None_0x05.txt", "r") as f:
+        for line in f:
+            payload = bytes.fromhex(line.strip())
+           
+            msg = Status500ms(payload)
+            print(msg)
+
+
+            
