@@ -399,17 +399,19 @@ TYPES_FROM_MCU = {
     # 0x04 - factory test, length = 1
     
     0x05: Status500ms, # 0x05 - 500ms, length = 6, RTC data
-    # 0x07 - legnth 16, appears to contain the version and git hash of the MCU firmware
+    # 0x07 - length 16, appears to contain the version and git hash of the MCU firmware
     # 0x0b - len 1
     # 0x0d - length = 2
    
     0x0f: Unk0x0F,  # 0x0f - length = 8, sent from Com Timer, 
     # 0x10 - length = 1, contains no useful data, sent in reply to pkt 19
 
-    # 0x11, length = 2, some kind of elaborate bitmask, sent from imu task
+    # 0x11, length = 2, some kind of elaborate bitmask, sent from various places, seems like an ack
     # 0x20, length = 7, linelaser status, { timestamp(uint32), 0 uint16, status uint16 }
+    # 0x21, length = 2
     # 0x23, length = 5, something connected with the base
     # 0x24, length = 1, one bit
+    # 0x25, length = 3
     # 0x26, length = 2, slowSensor
     # 0x27, length = 12,
     # 0x29, length = 5, reads from product ID register, so probably the MCU type
@@ -438,8 +440,21 @@ TYPES_TO_MCU = {
     # 0x0C - length should be 4
     # 0x0D - length should be 4, (similar to 0x0C)
     # 0x0E - length should be 4
-    # 0x0F - length should be 4, one uint (something with time)
+    # 0x0F - length should be 4, one uint (something with time, sets the delta from 0x05)
+    # 0x10 - length should be 12, sets LDS calibration - 3 float32 (x,y,angle)
+    # 0x11 (17) - length should be 4 - Set RTC time (uint32, unix timestamp)
+    # 0x12 (18) - length should be 1
+    # 0x13 (19) - length should be 2, some kind of combo packet, has the option to request the version of the MCU firmware
+    # 0x14 (20) - length should be less than 32
+    # 0x15 (21) - length should be less than 0x14
 
+    # 0x1c (28) - length should be 1 or 2, turns on/off the linelaser when len=1, when len2 does not seem to do anything
+    # 0x1d (29) - length should be 1, 0/1, sets a global variable
+    # 0x1e (30) - length should be 1, 0/1, 
+    # 0x1f (31) - length should be 4, one uint32, sets a global variable
+    # 0x20 (32) - INVALID
+    # 0x21 (33) - INVALID
+    
 
 
 }
