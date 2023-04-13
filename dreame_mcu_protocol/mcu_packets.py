@@ -102,8 +102,8 @@ class Status20ms:
     y: int  # int32
     yaw: float  # int32
     yaw_integral: int  # int32
-    leftVel: int  # int16
-    rightVel: int  # int16
+    leftVel: int  # int16 # left wheel velocity
+    rightVel: int  # int16 # right wheel velocity 
     edgeDis: int  # int16
     roller_motor_current: int
     sidebrush_motor_current: int
@@ -385,7 +385,7 @@ class Status500ms:
 class Unk0x0F:
     # one uint32 is timestamp, second uint32 is some kind of time delta
     timestamp: int # uint32
-    unk1_delta: int # uint32
+    unk1_delta: int # uint32 # this variable is called comDelay in the mcu code
     def __init__(self, data):
         self.timestamp, self.unk1_delta = unpack_checked("<II", data)
     def __repr__(self):
@@ -400,7 +400,7 @@ TYPES_FROM_MCU = {
     
     0x05: Status500ms, # 0x05 - 500ms, length = 6, RTC data
     # 0x07 - length 16, appears to contain the version and git hash of the MCU firmware
-    # 0x0b - len 1
+    # 0x0b - len 1, 1 = start lidar calibrate, 2 = stop lidar calibrate, 0 unknown [instead of calibrate it might be spinup]
     # 0x0d - length = 2
    
     0x0f: Unk0x0F,  # 0x0f - length = 8, sent from Com Timer, 
@@ -410,10 +410,10 @@ TYPES_FROM_MCU = {
     # 0x20, length = 7, linelaser status, { timestamp(uint32), 0 uint16, status uint16 }
     # 0x21, length = 2
     # 0x23, length = 5, something connected with the base
-    # 0x24, length = 1, one bit
+    # 0x24, length = 1, one bit, something connected with the battery temperature 
     # 0x25, length = 3
     # 0x26, length = 2, slowSensor
-    # 0x27, length = 12,
+    # 0x27, length = 12, log/error information [ sent from log_data_to_memory]
     # 0x29, length = 5, reads from product ID register, so probably the MCU type
     # 0x28 ???
     0x2B: BatteryStatus,
@@ -435,7 +435,7 @@ TYPES_TO_MCU = {
     # 0x07 - INVALID
     # 0x08 - INVALID
     # 0x09 - INVALID
-    # 0x0A - length should be 1, the byte should be 0, 1 or 2
+    # 0x0A - length should be 1, the byte should be 0, 1 or 2, somthing connected with OTA, or rebooting the MCU in some way
     # 0x0B - length should be 2, first byte 0-6, second byte ==1
     # 0x0C - length should be 4
     # 0x0D - length should be 4, (similar to 0x0C)
