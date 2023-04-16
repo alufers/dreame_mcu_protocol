@@ -77,13 +77,19 @@ The MCU appears to be running some kind of lightweight RTOS. It runs a few tasks
 | `imu` | Sends the `Status10ms` message. |
 | `motorCtrl` |  |
 | `comRxd` |  |
-| `EKF` |  |
+| `EKF` | Monitor the battery current and voltage. |
 | `lineLaser` |  |
 | `comTxd` |  |
 
 | Timer name | Description |
 |------------|-------------|
 | `comTimer` | Runs every 100ms, sends `Status100ms` and  `Triggers`, `0x05`, `0x0f` (every 500ms),  |
+
+| USART name | Description |
+|------------|-------------|
+| `USART0`   | Communication with the mcu  |
+| `USART1`   | CLI interface (exposed on the header) |
+| `USART2`   | Communication with the LDS ? |
 
 ## AVA nodes
 
