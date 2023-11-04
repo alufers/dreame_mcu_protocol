@@ -63,7 +63,7 @@ After that open it in a text editor and remove the leading spaces, because it ma
 
 ## MCU firmware
 
-The MCU appears to be running some kind of lightweight RTOS. It runs a few tasks concurrently 
+The MCU appears to be running FreeRTOS. It runs a few tasks concurrently 
 
 | Task name | Description |
 |-----------|-------------|
