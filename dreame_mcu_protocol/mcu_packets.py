@@ -485,7 +485,11 @@ class ToMcu_SetButtonLEDState:
         Controls the button LEDs (value of state should be less than 53)
         It also doubles as a heartbeat packet, the MCU has some timers for it.
 
-        2 = on
+        2 = on (white)
+        3 = on (white)
+        4 = home button flashing (white)
+        6 - ???
+        27 = flashing (red)
         33 = off
     """
     state: int # uint8
