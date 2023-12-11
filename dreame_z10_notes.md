@@ -102,10 +102,34 @@ The nodes are:
 
 | Node name | Description |
 |-----------|-------------|
-| `node_com.so` | Communicates with the robot's MCU over a serial port. It only handles connecting to the serial port, packetizing and checksuming the messages. It appears that it doesn't understand the contents of the packets. |
+| `node_com.so` | Communicates with the robot's MCU over a serial port. It only handles connecting to the serial port, packetizing and checksuming the messages. It appears that it doesn't understand the contents of the packets. This is the "link" layer. |
 | `node_cmd.so` | Process commands from `avacmd` (This node listens for commands on a unix socket at `/tmp/avacmd.socket`) |
 | `node_log.so` | Crash handling, includes [Google breakpad](https://chromium.googlesource.com/breakpad/breakpad/) |
 | `node_lds.so` | Handles serial communication with the LDS (Lidar) sensor. |
+| `node_signal.so` | Transforms AVA IPC messages to messages that will be sent to the MCU over serial and vice versa. It actually understands the contents of the messages. This appears to be a "HAL" between the platform and high-level behavior code. It also maps raw LDS data provided by `node_lds.so` for use by higher layers. |
+| `node_camera_laser.so` | Opens the infrared camera, and talks to some mcu at /dev/ttyS2 |
+
+To search for nodes that receive MCU messages grep with `grep -alr 'AvaComMsg' .`.
+
+The most interesting node is `node_signal.so`, as it contains the structure of all control messages sent to the MCU. It contains a symbol (mis) named `CastComMsg(this, type, data, length)` which sends a message to the MCU.
+
+Select messages that are passed between the nodes:
+
+```mermaid
+graph TD
+    node_com.so -->|"COM_UP:AvaComMsg"| node_signal.so
+    node_signal.so -->|"COM_DOWN:AvaComMsg"| node_com.so
+    
+    node_lds.so -->|"ava_msg_lds_pack\n(raw LDS data)"| node_signal.so
+    node_com.so -->|""COM_UP:AvaComMsg""| node_sys.so
+    node_eros.so -->|"ava_msg_station_led_set"| node_signal.so
+    node_eros.so -->|"ava_msg_button_led"| node_signal.so
+    
+    node_eros.so -->|"_CtrlMcuCMD"| node_signal.so
+    node_health_eros.so -->|"_CtrlMcuCMD"| node_signal.so
+    node_laser_transfer.so.so -->|"_CtrlMcuCMD"| node_signal.so
+    node_lds.so-->|"_CtrlMcuCMD"| node_signal.so
+```
 
 # Lidar sensor protocol
 

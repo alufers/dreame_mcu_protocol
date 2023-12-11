@@ -77,56 +77,58 @@ def analyze_message(msg):
 
 
 def main():
-    analyze_message(
-        b"\x3c\x1a\x01\xcd\xa8\xfb\x01\xe1\x0b\xfd\xff\x6f\xb5\xff\xff\x28\xee\xff\xff\xaf\x28\x00\x00\x00\x00\x00\x00\x00\x00\xa0\xe3\x3e"
-    )
-    analyze_message(
-        b"\x3c\x12\x02\xf3\x77\xd8\x44\x18\x00\xee\xff\x18\x00\x37\x00\x29\x00\x76\x40\x00\x00\xe8\x32\x3e"
-    )
-    analyze_message(
-        b"\x3c\x12\x02\xad\xe8\xdf\xa3\x1e\x00\xee\xff\x1c\x00\x11\x08\x7b\x3f\x3f\x70\x00\x00\x00\x7e\xa9\x3e"
-    )
-
-    analyze_message(
-        bytes.fromhex("3C011E0160E83E")
-    )  # squashfs-root/ava/script/ota_dw_fw.sh
-
-    analyze_message(
-        bytes.fromhex("3C01020060213E")
-    )  # squashfs-root/ava/script/mcu_monitor_arm.sh
-    analyze_message(
-        bytes.fromhex("3C010A81C0E63E")
-    )  # squashfs-root/ava/script/ota_base_station.sh
+    # analyze_message(
+    #     b"\x3c\x1a\x01\xcd\xa8\xfb\x01\xe1\x0b\xfd\xff\x6f\xb5\xff\xff\x28\xee\xff\xff\xaf\x28\x00\x00\x00\x00\x00\x00\x00\x00\xa0\xe3\x3e"
+    # )
+    # analyze_message(
+    #     b"\x3c\x12\x02\xf3\x77\xd8\x44\x18\x00\xee\xff\x18\x00\x37\x00\x29\x00\x76\x40\x00\x00\xe8\x32\x3e"
+    # )
+    # analyze_message(
+    #     b"\x3c\x12\x02\xad\xe8\xdf\xa3\x1e\x00\xee\xff\x1c\x00\x11\x08\x7b\x3f\x3f\x70\x00\x00\x00\x7e\xa9\x3e"
+    # )
 
     # analyze_message(
-    #     bytes.fromhex("3c1a01a49ec0fb16150000d5d3ffff24cbffff113700000000000000006f3f3e")
+    #     bytes.fromhex("3C011E0160E83E")
+    # )  # squashfs-root/ava/script/ota_dw_fw.sh
+
+    # analyze_message(
+    #     bytes.fromhex("3C01020060213E")
+    # )  # squashfs-root/ava/script/mcu_monitor_arm.sh
+    # analyze_message(
+    #     bytes.fromhex("3C010A81C0E63E")
     # )  # squashfs-root/ava/script/ota_base_station.sh
 
-    analyze_message(
-        bytes.fromhex(
-            "3c09030f0002000100ff120228f0b6b81800ecff18002b00030076400000b7043e"
-        )
-    )  # packet that had a mismatched crc
+    # # analyze_message(
+    # #     bytes.fromhex("3c1a01a49ec0fb16150000d5d3ffff24cbffff113700000000000000006f3f3e")
+    # # )  # squashfs-root/ava/script/ota_base_station.sh
 
-    # battery status parsing
-    payload = bytes.fromhex("4040a600fa00000017250000")
+    # analyze_message(
+    #     bytes.fromhex(
+    #         "3c09030f0002000100ff120228f0b6b81800ecff18002b00030076400000b7043e"
+    #     )
+    # )  # packet that had a mismatched crc
 
-    bat_status = BatteryStatus(payload)
-    print(bat_status)
+    # # battery status parsing
+    # payload = bytes.fromhex("4040a600fa00000017250000")
 
-    with open("captures/unknowns_from_mcu_0x0f.txt", "r") as f:
-        for line in f:
-            payload = bytes.fromhex(line.strip())
-            if len(payload) != 8:
-                continue
-            msg = Unk0x0F(payload)
-            print(msg)
-    with open("captures/unknown_None_0x05.txt", "r") as f:
-        for line in f:
-            payload = bytes.fromhex(line.strip())
+    # bat_status = BatteryStatus(payload)
+    # print(bat_status)
+
+    # with open("captures/unknowns_from_mcu_0x0f.txt", "r") as f:
+    #     for line in f:
+    #         payload = bytes.fromhex(line.strip())
+    #         if len(payload) != 8:
+    #             continue
+    #         msg = Unk0x0F(payload)
+    #         print(msg)
+    # with open("captures/unknown_None_0x05.txt", "r") as f:
+    #     for line in f:
+    #         payload = bytes.fromhex(line.strip())
            
-            msg = Status500ms(payload)
-            print(msg)
+    #         msg = Status500ms(payload)
+    #         print(msg)
+
+    analyze_message( bytes.fromhex("3C011E0160E83E")) #mcu_monitor_arm.sh
 
 
             

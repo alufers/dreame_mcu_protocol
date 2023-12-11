@@ -61,7 +61,7 @@ def capture_ssh_output(
                 line = strace_proc.stderr.readline()
                 if not line:
                     break
-
+               
                 if line.startswith(b"write("):
                     # write to serial
                     # print("write: {}".format(line.decode("utf-8")))
@@ -71,6 +71,7 @@ def capture_ssh_output(
                     # read from serial
                     # print("read: {}".format(line.decode("utf-8")))
                     read_stream.write(bytes_from_strace_line(line))
+                    pass
         finally:
             strace_proc.terminate()
 

@@ -31,7 +31,7 @@ def main():
         help="Focus on a specific message type, and display it live",
         type=str,
         default=None,
-        choices=list([x.__name__ for x in TYPES_FROM_MCU.values()])
+        choices=list([x.__name__ for x in TYPES_FROM_MCU.values()] + [x.__name__ for x in TYPES_TO_MCU.values()])
         + [None, "Unknown", "DecodingError", "CrcError"],
     )
     parser.add_argument(
@@ -45,6 +45,7 @@ def main():
         help="The direction of the packets to sniff",
         type=str,
         choices=["to_mcu", "from_mcu"],
+        default="from_mcu",
     )
     args = parser.parse_args()
 
@@ -55,9 +56,11 @@ def main():
     )
     PACKET_TYPES = TYPES_FROM_MCU
     stream = r
+    
     if args.direction == "to_mcu":
         stream = w
         PACKET_TYPES = TYPES_TO_MCU
+       
     if args.dump_unknown:
         os.makedirs("unknowns", exist_ok=True)
     while True:
@@ -87,6 +90,7 @@ def main():
 
             else:
                 if args.focus_msg is None or args.focus_msg == "Unknown":
+                    print(type)
                     print(
                         "Unknown type 0x{:02x} (len = {}):".format(type, len(payload))
                     )
