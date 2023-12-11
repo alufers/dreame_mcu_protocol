@@ -68,7 +68,7 @@ The MCU appears to be running FreeRTOS. It runs a few tasks concurrently
 | Task name | Description |
 |-----------|-------------|
 | `watchDog` |  |
-| `fastSensor` |  |
+| `fastSensor` | Sends Triggers packet, detects the carpet.  |
 | `cli` |  |
 | `ldsStamp` |  |
 | `log` |  |
@@ -76,7 +76,8 @@ The MCU appears to be running FreeRTOS. It runs a few tasks concurrently
 | `slowSensor` | Sends packet type 0x26 |
 | `imu` | Sends the `Status10ms` message. |
 | `motorCtrl` |  |
-| `comRxd` |  |
+| `comRxd` | Receives data from the SoC and dispatches them to the appropriate handler. |
+| `comTxd` (started by com RxD) | Reads data from the queue of packets to send and sends them to the SoC. |
 | `EKF` | Monitor the battery current and voltage. |
 | `lineLaser` |  |
 | `comTxd` |  |
