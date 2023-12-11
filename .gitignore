@@ -179,3 +179,7 @@ nand0p5_dreame
 squashfs-root
 ghidraproj
 struct.txt
+unknowns
+mcu.bin
+tmp
+dreame_z10_mcu_flash_dump.bin
