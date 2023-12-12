@@ -105,7 +105,7 @@ The nodes are:
 | `node_com.so` | Communicates with the robot's MCU over a serial port. It only handles connecting to the serial port, packetizing and checksuming the messages. It appears that it doesn't understand the contents of the packets. This is the "link" layer. |
 | `node_cmd.so` | Process commands from `avacmd` (This node listens for commands on a unix socket at `/tmp/avacmd.socket`) |
 | `node_log.so` | Crash handling, includes [Google breakpad](https://chromium.googlesource.com/breakpad/breakpad/) |
-| `node_lds.so` | Handles serial communication with the LDS (Lidar) sensor. |
+| `node_lds.so` | Handles low-level serial communication with the LDS (Lidar) sensor. |
 | `node_signal.so` | Transforms AVA IPC messages to messages that will be sent to the MCU over serial and vice versa. It actually understands the contents of the messages. This appears to be a "HAL" between the platform and high-level behavior code. It also maps raw LDS data provided by `node_lds.so` for use by higher layers. |
 | `node_camera_laser.so` | Opens the infrared camera, and talks to some mcu at /dev/ttyS2 |
 
@@ -139,6 +139,172 @@ The frame consists of 38 bytes, received over a serial communication interface. 
 The first byte is a header byte with the value 0x55.
 The second byte is a header byte with the value 0xaa.
 The next 36 bytes are data bytes.
+
+
+# liberos_tactics_tree.so
+
+Contains the definitions of nodes in the [Behavior tree](https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)). In short these are the "brains" of the robot. The [BehaviorTree.CPP](https://www.behaviortree.dev/) library is used to implement the architecture of the behavior tree.
+
+The nodes named like a question (`Is..`, `Does...`) are condition nodes, and the nodes named like an imperative (`ChangeModeTo`, `Set...`) are action nodes (usually leaves).
+
+The following nodes are defined (list split into categories like in the binary):
+
+- `RobotMcuSignalCtrl`
+    - `RobotIRSwitch`
+        - can check for `Cliff_ON`
+        - can check for `Front_ON`
+    - `LDS_Switch`
+- `RobotModeDeal`
+    - `ChangeRobotModeTo` can change robot mode to the following:
+        - `IsAimMode_Pause`
+        - `IsAimMode_Auto`
+        - `IsAimMode_BackHome`
+        - `IsAimMode_Charging`
+        - `IsAimMode_FiledClean`
+        - `IsAimMode_ErrReport`
+        - `IsAimMode_PowerOff`
+        - `IsAimMode_Sleep`
+        - `IsAimMode_Standby`
+        - `IsAimMode_Remote`
+        - `IsAimMode_OTA`
+        - `IsAimMode_AreaSelect`
+        - `IsAimMode_DrawArea`
+        - `IsAimMode_PointSelect`
+        - `IsAimMode_FastMapBuild`
+    - `RobotModeAdjugement`
+    - `SwitchCaseNode`
+- `EscapeTree`
+    - `IsEscapeCheckWarning`
+    - `IsBumpWarning`
+    - `IsLDSBumpWarning`
+    - `IsDropWarning`
+    - `IsCliffWarning`
+    - `IsLeftWheelCurrentWarning`
+    - `IsRightWheelCurrentWarning`
+    - `IsBrushCurrentWarning`
+    - `IsSideCurrentWarning`
+    - `IsGestureWarning`
+    - `IsBumpRepeatWarning`
+    - `IsDropRepeatWarning`
+    - `IsTurnSuffocateWarning`
+    - `IsForwardSuffocateWarning`
+    - `IsSlamStuckWarning`
+    - `IsVirtualWarning`
+    - `EscapeBrushCurrentDeal`
+    - `EscapeBumpDeal`
+    - `EscapeBumpRepeatDeal`
+    - `EscapeCliffDeal`
+    - `EscapeDropDeal`
+    - `EscapeDropRepeatDeal`
+    - `EscapeEndDeal`
+    - `EscapeForwardSuffocateDeal`
+    - `EscapeGestureDeal`
+    - `EscapeInitDeal`
+    - `EscapeLDSBumpDeal`
+    - `EscapeLeftWheelCurrentDeal`
+    - `EscapeRightWheelCurrentDeal`
+    - `EscapeSideCurrentDeal`
+    - `EscapeSlamStuckDeal`
+    - `EscapeTurnSuffocateDeal`
+    - `EscapeVirtualDeal`
+    - `immovable_motion`
+    - `testinput`
+    - `UpdateSlamInfo`
+- `RobotSignalDetect`
+    - `RobotPowerGetHigherThan` (accepts an unsigned short "capability", so probably this is the battery percentage left)
+    - `RobotPowerGetLowerThan` (accepts an unsigned short "capability", so probably this is the battery percentage)
+    - `RobotTimerLongerThan_ms`
+    - `RobotTimerLongerThan_ms_noinit`
+    - `RobotTimerLongerThan_s`
+    - `DoesRobotGetCharger`
+    - `RobotTimer_ms_Init`
+    - `RobotTimer_s_Init`
+    - `DoesWheelDrop`
+    - `DoesWheelsDrop`
+    - `GetWheelsDropStateBeforeSleep`
+    - `DoesWheelsChangedWhenSleep`
+    - `DoesCliffDrop`
+    - `DoesOdomChange`
+    - `DoesIMUDetectMove`
+    - `DoesIMUDetectMoveLast2S`
+    - `IsRobotStableOnCharger`
+    - `DoesRobotGetChargerSig`
+    - `DoesRobotGetChargerSigCheck`
+    - `DoesRobotWriteSN`
+    - `ChangeModeToFactoryRunTest`
+    - `Does_IMU_Temperature_Changed`
+    - `IsTimeToCaliIMU`
+    - `IncreaseIMUCaliTIme`
+    - `InitIMUCaliTIme`
+    - `IsVslamLost`
+    - `DoesRobotPutOnWaterBox`
+    - `DoesRobotPutOnDustBox`
+    - `DoesRobotDropWaterBox`
+    - `DoesRobotChargerStateChange`
+    - `DoesRobotMoved`
+    - `UpdateRobotBoxState`
+    - `Does_NeedToCalibrate_IMU_Diff`
+    - `Does_NeedToCalibrate_IMU_Err`
+    - `Does_FinishCalibrate_IMU`
+    - `DoesGetRobotChargeWarnning`
+    - `DoesRobotUsingWaterBox`
+    - `DoesRobotCheckCarpet`
+    - `GetIMUPose` (action)
+    - `InitRollPitchCheck`
+    - `RollPitchMinMaxUpdate`
+    - `DoesInitialIMUPoseDriftEnable`
+    - `DoesRobotPutOnTuobu`
+    - `GetStationCharge`
+    - `DoesStationChargerOn`
+    - `DoesChargerDrop`
+    - `DoesChargerStationDrop`
+    - `DoesChargerGetOn`
+    - `CheckBaroCali`
+    - `PurgeTankCheck`
+    - `DoesTuobuInstall`
+    - `MopModeMonot`
+    - `DoesStationConnect`
+- `RobotUISet`
+    - `LedModeSet`
+    - `RobotMusicPlay`
+    - `RobotMusicPlaySet`
+- `RobotWIFI_Deal`
+    - `DoesReceiveWIFICMD` (receives commands given by the app)
+- `StationHandle`
+    - `SweepStationContorl` (sic!)
+- `say_something`
+    - `SaySomething`
+    - `ThrowErrMSG`
+- `WashStationManag`
+    - `DoesUvLightStatus`
+    - `DoesWashStatus`
+    - `SetDryHandleTime`
+    - `SetUvLightStatus`
+    - `SetUvTime`
+    - `SetWashStatus`
+    - `SewagePumpHandle`
+- `PSD_deal`
+    - `PSD_interpolation`
+- `local_map`
+    - `GetLocalMapNode`
+- `RobotCollectDust` (bese station with suction motor)
+    - `DoesDustStatus`
+    - `DustContrlSet`
+    - `DustTimeHandle`
+    - `SetDustLight`
+    - `SetDustStatus`
+    - `SetDustTime`
+- `RobotCleanSet`
+    - `RobotCleanModeSysSet`
+    - `RobotMopGearSet`
+- `MopRobotCleanMode`
+    - `SetRobotCleanMode`
+- `RobotHealth`
+    - `IsRobotErrCodeChanged`
+- `RobotKeyDetect`
+
+
+
 
 # LDS calibration
 

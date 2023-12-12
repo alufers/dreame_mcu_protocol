@@ -403,21 +403,88 @@ class PingMsg:
     def __repr__(self):
         return "Unk0x0F(timestamp = {}, unk1_delta = {})".format(self.timestamp, self.unk1_delta)
 
+class HwInfo:
+    mcu_type: int # uint8
+    """
+    NONE
+    GD32F303ZET6
+    GD32F103ZET6
+    GD32F103C8T6
+    GD32F303C8T6
+    """
+    imu_type: int # uint8
+    """
+    NONE
+    BMI160
+    ICM40608
+    ICM42688
+    ICM20600
+    """
+    imu2_type: int # uint8
+    charge_type: int # uint8
+    """
+    NONE
+    BQ24725
+    PWM
+    """
+    app_type: int # uint8
+    """
+    NONE
+    APP1
+    APP2
+    """
+    def __init__(self, data):
+        self.mcu_type, self.imu_type, self.imu2_type, self.charge_type, self.app_type = unpack_checked("<BBBBB", data)
+    def __repr__(self):
+        return "HwInfo(mcu_type = {}, imu_type = {}, imu2_type = {}, charge_type = {}, app_type = {})".format(self.mcu_type, self.imu_type, self.imu2_type, self.charge_type, self.app_type)
+
+class McuFwVersionInfo:
+    git_hash: str # 10 bytes
+    version: str # 6 bytes
+    def __init__(self, data):
+        self.git_hash, self.version = unpack_checked("<10s6s", data)
+        self.git_hash = self.git_hash.decode("ascii").rstrip("\0")
+        self.version = self.version.decode("ascii").rstrip("\0")
+    def __repr__(self):
+        return "McuFwVersionInfo(git_hash = {}, version = {})".format(self.git_hash, self.version)
+
+class ShutdownMsg:
+    def __init__(self, data):
+        assert len(data) == 1
+    def __repr__(self):
+        return "ShutdownMsg()"
+
+class FactoryTest:
+    """
+    Invokes a testing procedure on the SOC from the MCU. 
+
+    """
+    wifi_ssid_id: int # uint8
+    """
+        In stock firmware this character is passed as an argument to /ava/script/wifi_test.sh,
+        which chooses an AP SSID based on this character. Probably so that they can test multiple robots at once.
+    """
+    def __init__(self, data):
+        self.wifi_ssid_id = unpack_checked("<B", data)
+    def __repr__(self):
+        return "FactoryTest(wifi_ssid_id = {})".format(self.wifi_ssid_id)
+
 TYPES_FROM_MCU = {
     0x00: Triggers,
     0x01: Status20ms,
     0x02: Status10ms, # AvaImuMsg
     0x03: Status100ms, # Used on Z10, len=9 (can have different length on other models) Decoded by SignalTransPac3
-    # 0x04 - factory test, length = 1 (not handled in node_signal.so)
+    0x04: FactoryTest, # 0x04 - factory test, length = 1 (not handled in node_signal.so)
+    
     
     0x05: Status500ms, # 0x05 - 500ms, length = 6, RTC data
-    # 0x07 - length 16, contains the version and git hash of the MCU firmware (interpreted by node_sys.so)
+    # 0x06 - something with OTA, length = 1
+    0x07: McuFwVersionInfo, # 0x07 - length 16, contains the version and git hash of the MCU firmware (interpreted by node_sys.so)
     # 0x0b - len 1, 1 = start lidar calibrate, 2 = stop lidar calibrate, 0 unknown [instead of calibrate it might be spinup]
     # 0x0d - length = 2
    
     0x0f: PingMsg,  # 0x0f - length = 8, sent from Com Timer, 
-    # 0x10 - length = 1, contains no useful data, sent in reply to pkt 19 (involved in poweroff)
-
+    0x10: ShutdownMsg, # length = 1, contains no useful data, sent in reply to pkt 19 (involved in poweroff)
     # 0x11, length = 2, "fct_calibration" some kind of elaborate bitmask, sent from various places, seems like an ack
     # 0x12, length = 7. DoubleCameraTimestamp, or something with TOF (Not used on Z10)
     # 0x13, length = 1 AvaTOFCalibrationCmdMsg (Not used on Z10)
@@ -429,7 +496,7 @@ TYPES_FROM_MCU = {
     # 0x26, length = 2, sent from slowSensor, _CtrlMcuCMD
     0x27: McuLog, # length = 12, log/error information [ sent from log_data_to_memory], data is saved to "/data/log/mculog.bin" by AVA
     # 0x28 ???
-    # 0x29, length = 5, reads from product ID register, gets MCU type and IMU type (interpreted by node_sys.so)
+    0x29: HwInfo, # length = 5, reads from product ID register, gets MCU type and IMU type (interpreted by node_sys.so)
     0x2B: BatteryStatus, # ava_msg_battery
 }
 
@@ -456,10 +523,10 @@ class ToMcu_MotorCtrl:
     
     """
     flag: int # uint8, must be 0 or 1 , (switches between degrees and radians ???)
-    linear_velocity_set = int # int32 
-    rotational_velocity_set = int # int32
+    linear_velocity_set: float # float32 
+    rotational_velocity_set: float # float32
     def __init__(self, data):
-        self.flag, self.linear_velocity_set, self.rotational_velocity_set = unpack_checked("<bii", data)
+        self.flag, self.linear_velocity_set, self.rotational_velocity_set = unpack_checked("<Bff", data)
         assert self.flag in [0, 1]
     def __repr__(self):
         return "ToMcu_MotorCtrl(flag = {}, vl_set = {}, vr_set = {})".format(self.flag, self.linear_velocity_set, self.rotational_velocity_set)
@@ -536,6 +603,17 @@ class ToMcu_SetLDSCalibration:
     def __repr__(self):
         return "ToMcu_SetLDSCalibration(x = {}, y = {}, angle = {})".format(self.x, self.y, self.angle)
 
+class ToMcu_CalibrateIMU:
+    operation: int # uint8
+    """
+        0x01 - start IMU calibration
+        0x05 - Query IMU calibration status (Replies with 0x11)
+    """
+    def __init__(self, data):
+        self.operation = unpack_checked("<B", data)
+    def __repr__(self):
+        return "ToMcu_CalibrateIMU(operation = {})".format(self.operation)
+
 TYPES_TO_MCU = {
 
     # NOTES FROM RE OF MCU FIRWARE:
@@ -553,21 +631,26 @@ TYPES_TO_MCU = {
     # 0x09 - INVALID
     # 0x0A - 
     # 0x0B -
-    # 0x0C 
-    # 0x0D -
-    # 0x0E 
+    # 0x0C - report wifi test signal strength, len 4
+    # 0x0D - report wifi test frequency, len 4
+    # 0x0E - report wifi test ssid, max len 20, min len 1
     # 0x0F - PongMessage, len 4. Used to measure latency
     # 0x10 - INVALID
     0x11: ToMcu_SetLDSCalibration, # - set LDS calibration AvaCalibrationResultMsg, len=12
     # 0x12 - Set RTC time on the mcu len 4
     # 0x13 -
     # 0x14 - _CtrlMcuCMD len 2
-    # 0x15 -
-
-    # 0x1c - 
-    0x1d: ToMcu_LaserOrTofControl # - ava_tof_reset_msg, ava_msg_laser_reset # len 1 or 2
+    # 0x15 - set sn
+    # 0x16 - set did
+    # 0x17 - set fw_arm
+    # 0x18 - set wifi_mac
+    # 0x19 - set key
+    # 0x1a - set timezone
+    # 0x1b - set country
+    # 0x1c - set language
+    0x1d: ToMcu_LaserOrTofControl, # - ava_tof_reset_msg, ava_msg_laser_reset # len 1 or 2
     # 0x1e - 
-    # 0x1f - 
+    0x1f: ToMcu_CalibrateIMU, # - len 1
     # 0x20 - 
     # 0x21 - INVALID
     # 0x22 - INVALID [AvaTOFCalibrationResultMsg]
